@@ -19,3 +19,5 @@ double cosine_similarity(const vector<double>& a, const vector<double>& b) {
 double cosine_distance(const vector<double>& a, const vector<double>& b) {
     return 1.0 - cosine_similarity(a, b);
 }
+
+#endif

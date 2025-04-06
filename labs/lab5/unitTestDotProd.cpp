@@ -1,35 +1,61 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <iostream>
 #include "doctest.h"
+#include "cos_fun.h"
 #include "dot_prod_fun.h"
-#include "main.cpp"
+
+#include <vector>
+#include <string>
+#include <sstream>
+#include <utility>
+#include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
-TEST_CASE("Test cosine distance calculations") {
-    vector<vector<double>> test_vectors = {
-        {1, 2.5, 0.5, 0.99, 1.5},
-        {1, 3.6, 1.9, 0.98, -4},
-        {1, 4.5, 3.2, 0.71, 8.2},
-        {2.7, 7, 6, 9.5, -5.44},
-        {9, 11.5, 22.99, -2.3, 4.3},
-        {1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 0}
-    };
-    
-    // Compute pairwise cosine distances
+// Your testable logic
+vector<pair<double, pair<int, int>>> compute_cosine_distances(const vector<string>& input_strs) {
+    vector<vector<double>> vectors;
+
+    for (const auto& str : input_strs) {
+        stringstream ss(str);
+        vector<double> temp_vector;
+        double num;
+        while (ss >> num) {
+            temp_vector.push_back(num);
+        }
+        if (!temp_vector.empty()) {
+            vectors.push_back(temp_vector);
+        }
+    }
+
+    if (vectors.size() < 2) {
+        throw runtime_error("Not enough vectors to compute distances!");
+    }
+
     vector<pair<double, pair<int, int>>> distances;
-    for (size_t i = 0; i < test_vectors.size(); ++i) {
-        for (size_t j = i + 1; j < test_vectors.size(); ++j) {
-            double dist = cosine_distance(test_vectors[i], test_vectors[j]);
+    for (size_t i = 0; i < vectors.size(); ++i) {
+        for (size_t j = i + 1; j < vectors.size(); ++j) {
+            double dist = cosine_distance(vectors[i], vectors[j]);
             distances.push_back({dist, {i, j}});
         }
     }
-    
-    // Sort by increasing cosine distance (closer vectors first)
+
     sort(distances.begin(), distances.end());
-    
-    CHECK(!distances.empty());
-    CHECK(distances[0].first >= 0);
-    CHECK(distances[0].first <= 2); // Cosine distance should be in [0, 2]
+    return distances;
+}
+
+TEST_CASE("Cosine distance between simple 2D vectors") {
+    vector<string> input = {
+        "1 0",   // Vector 0
+        "0 1",   // Vector 1
+        "1 1"    // Vector 2
+    };
+
+    auto result = compute_cosine_distances(input);
+
+    CHECK(result.size() == 3);
+
+    CHECK(doctest::Approx(result[0].first).epsilon(0.001) == 0.29289); // (0,2) or (1,2)
+    CHECK(doctest::Approx(result[1].first).epsilon(0.001) == 0.29289); // (0,2) or (1,2)
+    CHECK(doctest::Approx(result[2].first).epsilon(0.001) == 1.0);     // (0,1)
 }

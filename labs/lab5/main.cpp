@@ -1,18 +1,20 @@
+// in a new file or above main in the same file
+
+#include <vector>
+#include <string>
+#include <sstream>
+#include <utility>
+#include <algorithm>
+#include <iostream>
 #include "cos_fun.h"
 #include "dot_prod_fun.h"
+using namespace std;
 
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <cmath>
-#include <algorithm>
-
-int main(int argc, char* argv[]) {
+vector<pair<double, pair<int, int>>> compute_cosine_distances(const vector<string>& input_strs) {
     vector<vector<double>> vectors;
-    
-    for (int i = 1; i < argc; ++i) {
-        stringstream ss(argv[i]);
+
+    for (const auto& str : input_strs) {
+        stringstream ss(str);
         vector<double> temp_vector;
         double num;
         while (ss >> num) {
@@ -22,12 +24,11 @@ int main(int argc, char* argv[]) {
             vectors.push_back(temp_vector);
         }
     }
-    
+
     if (vectors.size() < 2) {
-        cerr << "Not enough vectors to compute distances!\n";
-        return 1;
+        throw runtime_error("Not enough vectors to compute distances!");
     }
-    
+
     vector<pair<double, pair<int, int>>> distances;
     for (size_t i = 0; i < vectors.size(); ++i) {
         for (size_t j = i + 1; j < vectors.size(); ++j) {
@@ -35,14 +36,7 @@ int main(int argc, char* argv[]) {
             distances.push_back({dist, {i, j}});
         }
     }
-    
+
     sort(distances.begin(), distances.end());
-    
-    cout << "Pairs of vectors ordered by cosine closeness:\n";
-    for (const auto& entry : distances) {
-        cout << "Vector " << entry.second.first << " and Vector " << entry.second.second 
-             << " -> Cosine Distance: " << entry.first << "\n";
-    }
-    
-    return 0;
+    return distances;
 }

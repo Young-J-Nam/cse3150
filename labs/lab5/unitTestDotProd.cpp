@@ -59,3 +59,45 @@ TEST_CASE("Cosine distance between simple 2D vectors") {
     CHECK(doctest::Approx(result[1].first).epsilon(0.001) == 0.29289); // (0,2) or (1,2)
     CHECK(doctest::Approx(result[2].first).epsilon(0.001) == 1.0);     // (0,1)
 }
+
+TEST_CASE("Cosine distance between identical vectors") {
+    vector<string> input = {
+        "1 2 3",
+        "1 2 3"
+    };
+
+    auto result = compute_cosine_distances(input);
+
+    CHECK(result.size() == 1);
+    CHECK(doctest::Approx(result[0].first).epsilon(0.001) == 0.0); // identical -> distance 0
+}
+
+
+TEST_CASE("Cosine distance between opposite vectors") {
+    vector<string> input = {
+        "1 0",
+        "-1 0"
+    };
+
+    auto result = compute_cosine_distances(input);
+
+    CHECK(result.size() == 1);
+    CHECK(doctest::Approx(result[0].first).epsilon(0.001) == 2.0); // angle 180° → similarity -1 → distance 2
+}
+
+TEST_CASE("Cosine distance ignores empty or invalid input vectors") {
+    vector<string> input = {
+        "1 0 0",
+        "   ",          // should be ignored
+        "0 1 0",
+        "",             // should be ignored
+        "0 0 1"
+    };
+
+    auto result = compute_cosine_distances(input);
+
+    CHECK(result.size() == 3); // 3 valid vectors = 3 unique pairs
+
+    // Quick sanity check on a known pair
+    CHECK(doctest::Approx(result[2].first).epsilon(0.001) == 1.0); // orthogonal vectors
+}
